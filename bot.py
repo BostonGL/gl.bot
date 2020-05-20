@@ -1,4 +1,4 @@
-#GL Bot 2.0
+#GL Bot 2.1
 
 #Discord
 import discord
@@ -89,7 +89,7 @@ async def on_raw_reaction_add(payload):
 				print('[log][error] Пользователь не найден')
 		else:
 			print('[log][error] Роль не найдена')
-	elif message_id == 692680864022396980 and payload.emoji.name == "ok":
+	elif message_id == 692680864022396980 and payload.emoji.name == "yes":
 		guild_id = payload.guild_id
 		guild = discord.utils.find(lambda g : g.id == guild_id, bot.guilds)
 		role = discord.utils.get(guild.roles, name="Гражданин")
@@ -146,10 +146,12 @@ async def _8ball(ctx, *, arg):
 @commands.has_permissions(manage_messages=True)
 async def clear(ctx, amount=5):
 	amount = amount + 1
-	await ctx.channel.purge(limit=amount)
-	amount = amount - 1
-	await ctx.send(embed = discord.Embed(description = f":white_check_mark: Удалено {amount} сообщений"))
-	print(f'[log] Удаляю {amount} сообщений')
+	deleted = await ctx.channel.purge(limit=amount)
+	message = await ctx.send(embed = discord.Embed(description = f":white_check_mark: Удалено {len(deleted)} сообщений"))
+	print(f'[log] Удаляю {len(deleted)} сообщений')
+	await asyncio.sleep(4)
+	await message.delete(delay=None)
+
 
 @bot.command()
 async def wiki(ctx, *, args):
@@ -454,4 +456,16 @@ async def buy(ctx, what=None):
    			
 	conn.commit()
 
+@bot.command()
+async def vote(ctx, *, text):
+	await ctx.channel.purge(limit=1)
+	emb = discord.Embed(title = f"Пользователь **{ctx.message.author.name}** запускает голосование", color=0x2ecc71)
+	emb.description = (text)
+	message = await ctx.send(embed = emb)
+	await message.add_reaction('✅')
+	await message.add_reaction('❌')
+
+@bot.command()
+async def top(ctx):
+	embed = discord.Embed(title = "Топ 10 пользователей по деньгам.")
 bot.run(config.TOKEN)
